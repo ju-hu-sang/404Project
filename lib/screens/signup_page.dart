@@ -21,21 +21,20 @@ class _SignupPageState extends State<SignupPage> {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 400),
+        transitionDuration: const Duration(milliseconds: 500), // 500ms
         pageBuilder: (_, __, ___) => const LoginPage(),
         transitionsBuilder: (_, animation, __, child) {
           final curvedAnimation = CurvedAnimation(
             parent: animation,
             curve: Curves.easeInOut,
           );
-          final slideAnimation = Tween<Offset>(
-            begin: const Offset(1.0, 0.0), // 오른쪽에서 시작
-            end: Offset.zero,
-          ).animate(curvedAnimation);
-
           final fadeAnimation = Tween<double>(
             begin: 0.0,
             end: 1.0,
+          ).animate(curvedAnimation);
+          final slideAnimation = Tween<Offset>(
+            begin: const Offset(0.0, -0.1), // 위에서 아래로 (Slide Down)
+            end: Offset.zero,
           ).animate(curvedAnimation);
 
           return FadeTransition(
@@ -71,7 +70,12 @@ class _SignupPageState extends State<SignupPage> {
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: const Icon(Icons.arrow_back),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop(); // 이전 페이지로 돌아가기
+          },
+        ),
         title: const Text('회원가입'),
         centerTitle: false,
         backgroundColor: Colors.white,

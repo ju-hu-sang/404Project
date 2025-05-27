@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'camera_connect_page.dart'; // 로그인 성공 시 이동할 페이지
+import 'camera_connect_page.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,13 +17,38 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  void _exitAppWithAnimation(BuildContext context) async {
+    final overlay = Overlay.of(context);
+    final entry = OverlayEntry(
+      builder: (_) => Positioned.fill(
+        child: AnimatedOpacity(
+          opacity: 0.0,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeIn,
+          child: Transform.scale(
+            scale: 0.95,
+            child: const ColoredBox(color: Colors.white),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+    await Future.delayed(const Duration(milliseconds: 400));
+    entry.remove();
+    exit(0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: const Icon(Icons.arrow_back),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _exitAppWithAnimation(context), // 앱 종료 + 애니메이션
+        ),
         title: const Text(
           '로그인',
           style: TextStyle(
@@ -98,14 +125,8 @@ class _LoginPageState extends State<LoginPage> {
                             pageBuilder: (_, __, ___) => const CameraConnectPage(),
                             transitionsBuilder: (_, animation, __, child) {
                               final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
-                              final fadeAnimation = Tween<double>(
-                                begin: 0.0,
-                                end: 1.0,
-                              ).animate(curved);
-                              final slideAnimation = Tween<Offset>(
-                                begin: const Offset(1.0, 0.0), // 오른쪽에서 시작
-                                end: Offset.zero,
-                              ).animate(curved);
+                              final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(curved);
+                              final slideAnimation = Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(curved);
 
                               return FadeTransition(
                                 opacity: fadeAnimation,
@@ -151,7 +172,27 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 12),
                 _buildOutlineButton('회원가입', onPressed: () {
-                  // 회원가입 페이지 연결 가능
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 500),
+                      pageBuilder: (_, __, ___) => const SignupPage(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                        );
+                        final slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
+                          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                        );
+                        return FadeTransition(
+                          opacity: fadeAnimation,
+                          child: SlideTransition(
+                            position: slideAnimation,
+                            child: child,
+                          ),
+                        );
+                      },
+                    ),
+                  );
                 }),
               ],
             ),

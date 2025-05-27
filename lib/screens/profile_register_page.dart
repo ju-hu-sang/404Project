@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 
-import 'login_page.dart'; // ✅ LoginPage import 추가
+import 'profile_liston_page.dart'; // ✅ ProfileListOnPage import
 
 class ProfileRegisterPage extends StatefulWidget {
   const ProfileRegisterPage({Key? key}) : super(key: key);
@@ -27,7 +27,6 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
   @override
   void initState() {
     super.initState();
-
     _birthController.addListener(() {
       final raw = _birthController.text.replaceAll('/', '');
       String formatted = '';
@@ -56,7 +55,6 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
 
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -67,7 +65,7 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 배경색 흰색
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           '프로필 등록',
@@ -78,28 +76,38 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
           ),
         ),
         centerTitle: true,
+        backgroundColor: Colors.white, // ✅ AppBar 배경색: 화이트
+        foregroundColor: Colors.black, // ✅ AppBar 글자 및 아이콘 색상: 블랙
+        elevation: 1, // 필요에 따라 그림자 추가
         leading: const BackButton(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey[200],
-              child: _image != null
-                  ? ClipOval(
-                child: Image.file(
-                  _image!,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[200],
                 ),
-              )
-                  : Image.asset(
-                'assets/default_profile.png',
-                width: 70,
-                height: 70,
+                child: _image != null
+                    ? ClipOval(
+                  child: Image.file(
+                    _image!,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Image.asset(
+                    'assets/default_profile.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -147,29 +155,28 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  // 저장 후 LoginPage로 애니메이션 이동
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                      const LoginPage(),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        final curvedAnimation = CurvedAnimation(
+                      pageBuilder: (_, __, ___) => const ProfileListOnPage(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        final curved = CurvedAnimation(
                           parent: animation,
                           curve: Curves.easeInOut,
                         );
+                        final fadeAnimation =
+                        Tween<double>(begin: 0.0, end: 1.0).animate(curved);
+                        final scaleAnimation =
+                        Tween<double>(begin: 0.9, end: 1.0).animate(curved);
 
-                        final offsetAnimation = Tween<Offset>(
-                          begin: const Offset(1.0, 0.0), // 오른쪽에서
-                          end: Offset.zero, // 왼쪽으로
-                        ).animate(curvedAnimation);
-
-                        return SlideTransition(
-                          position: offsetAnimation,
-                          child: child,
+                        return FadeTransition(
+                          opacity: fadeAnimation,
+                          child: ScaleTransition(
+                            scale: scaleAnimation,
+                            child: child,
+                          ),
                         );
                       },
-                      transitionDuration: const Duration(milliseconds: 400),
+                      transitionDuration: const Duration(milliseconds: 500),
                     ),
                   );
                 },
@@ -183,7 +190,7 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -214,8 +221,7 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
           suffixText: suffixText,
           border: const OutlineInputBorder(),
           isDense: true,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
         style: const TextStyle(
           fontFamily: 'LGSmartUI',
