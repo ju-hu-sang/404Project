@@ -1,11 +1,11 @@
 # src/api/auth.py
 """Auth route /auth prefix"""
 from fastapi import APIRouter, Depends, HTTPException, status
-from schema.request import SignUpRequest, LogInRequest
-from schema.response import UserSchema, TokenSchema
-from service.auth import AuthService
-from database.repository import UserRepository
-from database.orm import User
+from schemas.auth import SignUpRequest, LogInRequest
+from schemas.auth import UserSchema, TokenSchema
+from services.auth_service import AuthService
+from  db.repository import UserRepository
+from db.models import User
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
